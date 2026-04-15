@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:astro_aso_csv_utility/shared/extention/color_extension.dart';
 import 'package:astro_aso_csv_utility/shared/extention/theme_extension.dart';
 import 'package:astro_aso_csv_utility/shared/themes/app_color.dart';
-import 'package:astro_aso_csv_utility/shared/utils/animated_indicator.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -293,7 +292,10 @@ class CommonWidget {
   }
 
   Widget loadingIos({required BuildContext context}) {
-    return AnimatedIndicator(isFetching: true, size: 36.r);
+    return CupertinoActivityIndicator(
+      color: AppColor.appTextColor,
+      radius: 18.r,
+    );
   }
 
   Widget commonErrorWidget({required BuildContext context, required double maxHeight}) {

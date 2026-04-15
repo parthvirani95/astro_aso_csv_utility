@@ -1,7 +1,6 @@
 import 'package:astro_aso_csv_utility/shared/di/get_it.dart';
 import 'package:astro_aso_csv_utility/shared/extention/theme_extension.dart';
 import 'package:astro_aso_csv_utility/shared/themes/app_color.dart';
-import 'package:astro_aso_csv_utility/shared/utils/animated_indicator.dart';
 import 'package:astro_aso_csv_utility/views/cubits/dashboard/dashboard_cubit.dart';
 import 'package:astro_aso_csv_utility/views/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
@@ -74,7 +73,7 @@ class _DashboardViewState extends State<DashboardView> with SingleTickerProvider
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          AnimatedIndicator(isFetching: true, size: 28.r),
+          CommonWidget().loadingIos(context: context),
           CommonWidget().sizesBox(height: 22),
           Text(
             'Please wait...',

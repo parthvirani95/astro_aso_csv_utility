@@ -24,10 +24,10 @@ Future<void> mainFunction() async {
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   }
 
-  locaKitDocumentPath =
-      '${(await path_provider.getApplicationDocumentsDirectory()).absolute.path}${Platform.pathSeparator}LocaKit';
+  csvKitDocumentPath =
+      '${(await path_provider.getApplicationDocumentsDirectory()).absolute.path}${Platform.pathSeparator}CSVKit';
 
-  Hive.init('$locaKitDocumentPath${Platform.pathSeparator}localDb');
+  Hive.init('$csvKitDocumentPath${Platform.pathSeparator}localDb');
 
   locaKitBox = await Hive.openBox(HiveBoxConstants.LOCAKIT_AI_BOX);
   appLanguageBox = await Hive.openBox(HiveBoxConstants.APP_LANGUAGE_BOX);

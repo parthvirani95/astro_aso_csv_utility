@@ -77,7 +77,7 @@ DeviceType? deviceType;
 String languageLocalPath = '';
 late String currentLangCode;
 
-String locaKitDocumentPath = '';
+String csvKitDocumentPath = '';
 String p8KeyPath = '';
 File? p8File;
 
