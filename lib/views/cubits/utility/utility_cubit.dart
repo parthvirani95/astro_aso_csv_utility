@@ -1294,68 +1294,71 @@ class UtlityCubit extends Cubit<UtilityState> {
           return;
         }
 
-        for (int i = 0; i < totalCSVFiles; i++) {
-          List<List<dynamic>> rows = [];
-          rows.add([
-            "App Name",
-            "App Id",
-            "Platform",
-            "Keyword",
-            "Store Domain",
-            "Store",
-            "Note",
-            "Last Update",
-            "Ranking",
-            "Change",
-            "Popularity",
-            "Difficulty",
-            "Apps in Ranking",
-          ]);
+        List<List<dynamic>> rows = [];
+        List<String> headers = [
+          "App Name",
+          "App Id",
+          "Platform",
+          "Keyword",
+          "Store Domain",
+          "Store",
+          "Note",
+          "Last Update",
+          "Ranking",
+          "Change",
+          "Popularity",
+          "Difficulty",
+          "Apps in Ranking",
+        ];
 
-          for (int i = 0; i < apps.length; i++) {
-            for (int j = 0; j < platforms.length; j++) {
-              for (int k = 0; k < keywords.length; k++) {
-                for (int l = 0; l < countries.length; l++) {
-                  String appName = apps[i].name.toString();
-                  int appId = apps[i].appId;
-                  String platform = platforms[j];
-                  String keyword = keywords[k];
-                  String countryName = countries[l];
-                  String countryCode = countryCodeMap[countryName] ?? "";
-                  String storeDomain = countryCode;
-                  String storeName = countryName;
-                  String note = "";
-                  String lastUpdate = formatUtc();
-                  int ranking = 0;
-                  int change = 0;
-                  int popularity = 0;
-                  int difficulty = 0;
-                  int appsInRanking = 0;
+        for (int i = 0; i < apps.length; i++) {
+          for (int j = 0; j < platforms.length; j++) {
+            for (int k = 0; k < keywords.length; k++) {
+              for (int l = 0; l < countries.length; l++) {
+                String appName = apps[i].name.toString();
+                int appId = apps[i].appId;
+                String platform = platforms[j];
+                String keyword = keywords[k];
+                String countryName = countries[l];
+                String countryCode = countryCodeMap[countryName] ?? "";
+                String storeDomain = countryCode;
+                String storeName = countryName;
+                String note = "";
+                String lastUpdate = formatUtc();
+                int ranking = 0;
+                int change = 0;
+                int popularity = 0;
+                int difficulty = 0;
+                int appsInRanking = 0;
 
-                  rows.add(
-                    [
-                      appName,
-                      appId,
-                      platform,
-                      keyword,
-                      storeDomain,
-                      storeName,
-                      note,
-                      lastUpdate,
-                      ranking,
-                      change,
-                      popularity,
-                      difficulty,
-                      appsInRanking,
-                    ],
-                  );
-                }
+                rows.add(
+                  [
+                    appName,
+                    appId,
+                    platform,
+                    keyword,
+                    storeDomain,
+                    storeName,
+                    note,
+                    lastUpdate,
+                    ranking,
+                    change,
+                    popularity,
+                    difficulty,
+                    appsInRanking,
+                  ],
+                );
               }
             }
           }
+        }
 
-          String csv = const ListToCsvConverter().convert(rows);
-          String fileName = "kwd_${exportTimeStamp}_${i + 1}.csv";
+        for (int i = 0; i < totalCSVFiles; i++) {
+          List<List<dynamic>> sublist = rows.sublist(i * splitCSVMaxRows, (i + 1) * splitCSVMaxRows);
+          sublist.insert(0, headers);
+
+          String csv = const ListToCsvConverter().convert(sublist);
+          String fileName = totalCSVFiles == 1 ? "kwd_$exportTimeStamp.csv" : "kwd_${exportTimeStamp}_${i + 1}.csv";
 
           // Ask user where to save
           final saveLocation = tempExportPath.trim().isEmpty
