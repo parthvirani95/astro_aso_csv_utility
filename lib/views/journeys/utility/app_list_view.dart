@@ -152,34 +152,36 @@ class _AppListViewState extends State<AppListView> {
                       alignment: WrapAlignment.start,
                       crossAxisAlignment: WrapCrossAlignment.start,
                       runAlignment: WrapAlignment.start,
-                      children: filteredAppList.map((option) {
-                        return FilterChip(
-                          label: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 12.r),
-                            child: Text(
-                              option.name,
-                              style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
-                                    color: AppColor.whiteColor,
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w400,
-                                  ),
+                      children: filteredAppList.map(
+                        (option) {
+                          return FilterChip(
+                            label: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 12.r),
+                              child: Text(
+                                option.name,
+                                style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
+                                      color: AppColor.whiteColor,
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                              ),
                             ),
-                          ),
-                          selected: selectedList.contains(option),
-                          backgroundColor: Colors.green[900]?.withOpacityNew(0.01),
-                          selectedColor: Colors.green[900],
-                          labelStyle: TextStyle(color: Colors.white),
-                          showCheckmark: false,
-                          onSelected: (isSelected) {
-                            if (isSelected) {
-                              selectedList.add(option);
-                            } else {
-                              selectedList.remove(option);
-                            }
-                            setState(() {});
-                          },
-                        );
-                      }).toList(),
+                            selected: selectedList.contains(option),
+                            backgroundColor: Colors.green[900]?.withOpacityNew(0.01),
+                            selectedColor: Colors.green[900],
+                            labelStyle: TextStyle(color: Colors.white),
+                            showCheckmark: false,
+                            onSelected: (isSelected) {
+                              if (isSelected) {
+                                selectedList.add(option);
+                              } else {
+                                selectedList.remove(option);
+                              }
+                              setState(() {});
+                            },
+                          );
+                        },
+                      ).toList(),
                     ),
                   ),
           ),
