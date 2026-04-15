@@ -90,3 +90,22 @@ Contributions are welcome. If you find a bug or want to improve the utility:
 ## License
 
 This project is open source. Add your preferred license file (`LICENSE`) and update this section (for example, MIT).
+
+# Create DMG file
+
+```
+
+flutter build macos --release
+cd build/macos/Build/Products/Release
+
+create-dmg \
+  --volname "Astro ASO CSV Utility" \
+  --window-pos 200 120 \
+  --window-size 800 400 \
+  --icon-size 100 \
+  --icon "Astro CSV Utility Kit.app" 200 190 \
+  --hide-extension "Astro CSV Utility Kit.app" \
+  --app-drop-link 600 185 \
+  "AstroASOCSVUtility-1.0.0.dmg" \
+  "Astro CSV Utility Kit.app"
+```

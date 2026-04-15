@@ -51,6 +51,7 @@ abstract class UtilityWidget extends State<UtilityView> {
                   child: Row(
                     children: [
                       Spacer(),
+                      CommonWidget().sizesBox(width: 12),
                       CommonWidget().containerField(
                         context: context,
                         title: "Apps",
@@ -381,9 +382,9 @@ abstract class UtilityWidget extends State<UtilityView> {
               alignment: Alignment.centerRight,
               child: CommonWidget().containerField(
                 context: context,
-                title: state.splitCSVMaxRows > 0
-                    ? ("${state.splitCSVMaxRows} rows per CSV : ${(state.totalCSVRows / state.splitCSVMaxRows).ceil()} CSV files")
-                    : "${state.totalCSVRows} rows : 1 CSV file",
+                title: state.splitCSVMaxRows == 0
+                    ? "No Split"
+                    : "${state.splitCSVMaxRows} rows per CSV : ${(state.totalCSVRows / state.splitCSVMaxRows).ceil()} CSV files",
                 onTap: () async => await bottomSheet(
                   context: context,
                   child: MaxCSVRows(utilityCubit: utilityCubit, state: state),

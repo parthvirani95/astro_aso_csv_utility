@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:astro_aso_csv_utility/globals.dart';
@@ -1315,21 +1316,24 @@ class UtlityCubit extends Cubit<UtilityState> {
           for (int j = 0; j < platforms.length; j++) {
             for (int k = 0; k < keywords.length; k++) {
               for (int l = 0; l < countries.length; l++) {
-                String appName = apps[i].name.toString();
+                String appName = apps[i].name.toString().trim();
                 int appId = apps[i].appId;
-                String platform = platforms[j];
-                String keyword = keywords[k];
-                String countryName = countries[l];
-                String countryCode = countryCodeMap[countryName] ?? "";
-                String storeDomain = countryCode;
-                String storeName = countryName;
+                String platform = platforms[j].trim().toLowerCase();
+                String keyword = keywords[k].trim();
+                String countryName = countries[l].trim();
+                String countryCode = countryCodeMap[countryName]?.trim() ?? "";
+                if (!astroCountryMap.keys.contains(countryCode)) {
+                  continue;
+                }
+                String storeDomain = countryCode.toString();
+                String storeName = countryName.toString();
                 String note = "";
-                String lastUpdate = formatUtc();
-                int ranking = 0;
-                int change = 0;
-                int popularity = 0;
-                int difficulty = 0;
-                int appsInRanking = 0;
+                String lastUpdate = formatUtc().toString();
+                int ranking = 1;
+                int change = 1;
+                int popularity = 1;
+                int difficulty = 1;
+                int appsInRanking = 1;
 
                 rows.add(
                   [
@@ -1354,7 +1358,13 @@ class UtlityCubit extends Cubit<UtilityState> {
         }
 
         for (int i = 0; i < totalCSVFiles; i++) {
-          List<List<dynamic>> sublist = rows.sublist(i * splitCSVMaxRows, (i + 1) * splitCSVMaxRows);
+          int startIndex = i * splitCSVMaxRows;
+          int endIndex = (i + 1) * splitCSVMaxRows;
+          if (endIndex > rows.length || (endIndex == 0)) {
+            endIndex = rows.length;
+          }
+
+          List<List<dynamic>> sublist = rows.sublist(startIndex, endIndex);
           sublist.insert(0, headers);
 
           String csv = const ListToCsvConverter().convert(sublist);
@@ -1377,7 +1387,14 @@ class UtlityCubit extends Cubit<UtilityState> {
             return;
           }
 
-          final file = XFile.fromData(Uint8List.fromList(csv.codeUnits), mimeType: 'text/csv', name: fileName);
+          String normalizedCsv = csv.replaceAll('\n', '\r\n');
+
+          final file = XFile.fromData(
+            Uint8List.fromList(utf8.encode(normalizedCsv)),
+            mimeType: 'text/csv',
+            name: fileName,
+          );
+
           lastCSVExportPath = saveLocation != null ? File(saveLocation.path).parent.path : tempExportPath;
           tempExportPath = lastCSVExportPath;
           await csvKitBox.put(HiveConstants.LAST_CSV_EXPORT_PATH, lastCSVExportPath);
@@ -1402,6 +1419,8 @@ class UtlityCubit extends Cubit<UtilityState> {
     }
   }
 
+  String clean(String s) => s.replaceAll('\n', ' ').trim();
+
   void updateSelectedApps({required List<AppListModel> apps, required UtilityLoadedState state}) {
     csvKitBox.put(HiveConstants.SELECTED_APPS, apps.map((app) => app.appId).toList());
     emit(state.copyWith(selectedApps: apps));
@@ -1420,8 +1439,17 @@ class UtlityCubit extends Cubit<UtilityState> {
   }
 
   void updateSelectedCountries({required List<String> countries, required UtilityLoadedState state}) {
-    csvKitBox.put(HiveConstants.SELECTED_COUNTRIES, countries);
-    emit(state.copyWith(selectedCountries: countries));
+    List<String> selectedCountries = List<String>.from(countries.map((country) => country.trim()).toList());
+    selectedCountries = selectedCountries.toSet().toList();
+
+    for (String country in countries) {
+      if (!astroCountryMap.keys.contains(countryCodeMap[country]?.trim() ?? '')) {
+        selectedCountries.remove(country);
+      }
+    }
+
+    csvKitBox.put(HiveConstants.SELECTED_COUNTRIES, selectedCountries);
+    emit(state.copyWith(selectedCountries: selectedCountries));
     calculateTotalCSVRows();
   }
 
