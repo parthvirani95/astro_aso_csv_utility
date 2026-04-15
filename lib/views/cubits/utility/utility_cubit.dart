@@ -1266,7 +1266,9 @@ class UtlityCubit extends Cubit<UtilityState> {
       loadingCubit.show();
       loadingCubit.showMessageAndLoading(message: "Preparing & Exporting CSV...", showCancelButton: false);
 
-      List<List<dynamic>> rows = [];
+      String exportTimeStamp = fileExportUTC();
+
+      String tempExportPath = ""; // use one time selected export path if there are multiple csv files
 
       if (state is UtilityLoadedState) {
         final st = state as UtilityLoadedState;
@@ -1277,6 +1279,11 @@ class UtlityCubit extends Cubit<UtilityState> {
         final splitCSVMaxRows = st.splitCSVMaxRows;
 
         int totalCSVRows = apps.length * platforms.length * keywords.length * countries.length;
+        int totalCSVFiles = 1;
+
+        if (totalCSVRows != 0 && splitCSVMaxRows != 0 && totalCSVRows > splitCSVMaxRows) {
+          totalCSVFiles = (totalCSVRows / splitCSVMaxRows).ceil();
+        }
 
         if (totalCSVRows == 0) {
           CustomSnackbar.show(
@@ -1287,94 +1294,93 @@ class UtlityCubit extends Cubit<UtilityState> {
           return;
         }
 
-        rows.add([
-          "App Name",
-          "App Id",
-          "Platform",
-          "Keyword",
-          "Store Domain",
-          "Store",
-          "Note",
-          "Last Update",
-          "Ranking",
-          "Change",
-          "Popularity",
-          "Difficulty",
-          "Apps in Ranking",
-        ]);
+        for (int i = 0; i < totalCSVFiles; i++) {
+          List<List<dynamic>> rows = [];
+          rows.add([
+            "App Name",
+            "App Id",
+            "Platform",
+            "Keyword",
+            "Store Domain",
+            "Store",
+            "Note",
+            "Last Update",
+            "Ranking",
+            "Change",
+            "Popularity",
+            "Difficulty",
+            "Apps in Ranking",
+          ]);
 
-        for (int i = 0; i < apps.length; i++) {
-          for (int j = 0; j < platforms.length; j++) {
-            for (int k = 0; k < keywords.length; k++) {
-              for (int l = 0; l < countries.length; l++) {
-                String appName = apps[i].name.toString();
-                int appId = apps[i].appId;
-                String platform = platforms[j];
-                String keyword = keywords[k];
-                String countryName = countries[l];
-                String countryCode = countryCodeMap[countryName] ?? "";
-                String storeDomain = countryCode;
-                String storeName = countryName;
-                String note = "";
-                String lastUpdate = formatUtc();
-                int ranking = 0;
-                int change = 0;
-                int popularity = 0;
-                int difficulty = 0;
-                int appsInRanking = 0;
+          for (int i = 0; i < apps.length; i++) {
+            for (int j = 0; j < platforms.length; j++) {
+              for (int k = 0; k < keywords.length; k++) {
+                for (int l = 0; l < countries.length; l++) {
+                  String appName = apps[i].name.toString();
+                  int appId = apps[i].appId;
+                  String platform = platforms[j];
+                  String keyword = keywords[k];
+                  String countryName = countries[l];
+                  String countryCode = countryCodeMap[countryName] ?? "";
+                  String storeDomain = countryCode;
+                  String storeName = countryName;
+                  String note = "";
+                  String lastUpdate = formatUtc();
+                  int ranking = 0;
+                  int change = 0;
+                  int popularity = 0;
+                  int difficulty = 0;
+                  int appsInRanking = 0;
 
-                rows.add(
-                  [
-                    appName,
-                    appId,
-                    platform,
-                    keyword,
-                    storeDomain,
-                    storeName,
-                    note,
-                    lastUpdate,
-                    ranking,
-                    change,
-                    popularity,
-                    difficulty,
-                    appsInRanking,
-                  ],
-                );
+                  rows.add(
+                    [
+                      appName,
+                      appId,
+                      platform,
+                      keyword,
+                      storeDomain,
+                      storeName,
+                      note,
+                      lastUpdate,
+                      ranking,
+                      change,
+                      popularity,
+                      difficulty,
+                      appsInRanking,
+                    ],
+                  );
+                }
               }
             }
           }
-        }
 
-        String csv = const ListToCsvConverter().convert(rows);
+          String csv = const ListToCsvConverter().convert(rows);
+          String fileName = "kwd_${exportTimeStamp}_${i + 1}.csv";
 
-        String fileName = "kwd_${fileExportUTC()}.csv";
+          // Ask user where to save
+          final saveLocation = tempExportPath.trim().isEmpty
+              ? await getSaveLocation(
+                  suggestedName: fileName,
+                  initialDirectory: lastCSVExportPath,
+                  acceptedTypeGroups: [
+                    const XTypeGroup(label: 'CSV', extensions: ['csv'])
+                  ],
+                )
+              : null;
 
-        // Ask user where to save
-        final saveLocation = await getSaveLocation(
-          suggestedName: fileName,
-          initialDirectory: lastCSVExportPath,
-          acceptedTypeGroups: [
-            const XTypeGroup(label: 'CSV', extensions: ['csv'])
-          ],
-        );
-
-        if (saveLocation == null) {
-          CustomSnackbar.show(snackbarType: SnackbarType.ERROR, message: "No save location selected");
-          loadingCubit.hide();
-          return;
-        }
-
-        final file = XFile.fromData(Uint8List.fromList(csv.codeUnits), mimeType: 'text/csv', name: fileName);
-
-        lastCSVExportPath = File(saveLocation.path).parent.path;
-        await csvKitBox.put(HiveConstants.LAST_CSV_EXPORT_PATH, lastCSVExportPath);
-        await file.saveTo(saveLocation.path);
-
-        if (totalCSVRows != 0 && splitCSVMaxRows != 0 && totalCSVRows > splitCSVMaxRows) {
-          int totalCSVFiles = (totalCSVRows / splitCSVMaxRows).ceil();
-          if (totalCSVFiles == 1) {
-            // Export CSV to multiple files
+          if (saveLocation == null && tempExportPath.trim().isEmpty) {
+            CustomSnackbar.show(snackbarType: SnackbarType.ERROR, message: "No save location selected");
+            loadingCubit.hide();
+            return;
           }
+
+          final file = XFile.fromData(Uint8List.fromList(csv.codeUnits), mimeType: 'text/csv', name: fileName);
+          lastCSVExportPath = saveLocation != null ? File(saveLocation.path).parent.path : tempExportPath;
+          tempExportPath = lastCSVExportPath;
+          await csvKitBox.put(HiveConstants.LAST_CSV_EXPORT_PATH, lastCSVExportPath);
+          await file.saveTo(
+            saveLocation != null ? saveLocation.path : '$tempExportPath${Platform.pathSeparator}$fileName',
+          );
         }
 
         CustomSnackbar.show(snackbarType: SnackbarType.SUCCESS, message: "CSV exported successfully");
