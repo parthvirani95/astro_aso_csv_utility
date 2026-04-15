@@ -945,6 +945,13 @@ Map<String, String> countryCodeMap = {
   "Zimbabwe": "zw",
 };
 
+Map<String, String> platformMap = {
+  'iphone': 'iPhone',
+  'ipad': 'iPad',
+  'mac': 'Mac',
+  'realityDevice': 'Vision OS',
+};
+
 String databaseAccessMsg = '''
   We need access to the Astro app database to list apps during CSV build.
 
@@ -978,7 +985,34 @@ class UtlityCubit extends Cubit<UtilityState> {
       bool dbExists = await isAstroDatabaseExists();
       if (status && dbExists) {
         final appList = await DatabaseHelper.instance.getAppNameAndIds();
-        emit(UtilityLoadedState(appList: appList));
+        final selectedApps = List<int>.from(
+          await csvKitBox.get(HiveConstants.SELECTED_APPS, defaultValue: []),
+        );
+        final selectedPlatforms = List<String>.from(
+          await csvKitBox.get(HiveConstants.SELECTED_PLATFORM, defaultValue: []),
+        );
+        final selectedKeywords = List<String>.from(
+          await csvKitBox.get(HiveConstants.SELECTED_KEYWORDS, defaultValue: []),
+        );
+        final selectedCountries = List<String>.from(
+          await csvKitBox.get(HiveConstants.SELECTED_COUNTRIES, defaultValue: []),
+        );
+        final totalCSVRows = await csvKitBox.get(HiveConstants.TOTAL_CSV_ROWS, defaultValue: 0);
+        final splitCSVMaxRows = await csvKitBox.get(HiveConstants.SPLIT_CSV_MAX_ROWS, defaultValue: 0);
+
+        final filteredAppList = appList.where((app) => selectedApps.contains(app.appId)).toList();
+
+        emit(
+          UtilityLoadedState(
+            appList: appList,
+            selectedApps: filteredAppList,
+            selectedPlatforms: selectedPlatforms,
+            selectedKeywords: selectedKeywords,
+            selectedCountries: selectedCountries,
+            totalCSVRows: totalCSVRows,
+            splitCSVMaxRows: splitCSVMaxRows,
+          ),
+        );
       } else {
         emit(
           UtilityErrorState(
@@ -998,7 +1032,17 @@ class UtlityCubit extends Cubit<UtilityState> {
           snackbarType: SnackbarType.ERROR,
           message: 'Using old database file due to lake of access to the new database file',
         );
-        emit(UtilityLoadedState(appList: appList));
+        emit(
+          UtilityLoadedState(
+            appList: appList,
+            selectedApps: [],
+            selectedPlatforms: [],
+            selectedKeywords: [],
+            selectedCountries: [],
+            totalCSVRows: 0,
+            splitCSVMaxRows: 0,
+          ),
+        );
         return;
       } else if (e.toString().contains("Operation not permitted")) {
         errorMessage = databaseAccessMsg;
@@ -1100,5 +1144,33 @@ class UtlityCubit extends Cubit<UtilityState> {
 
   Future<void> openFullDiskAccessSettings() async {
     Process.run('open', ['x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles']);
+  }
+
+  Future<void> exportCSV({required UtilityLoadedState state}) async {}
+
+  void updateSelectedApps({required List<AppListModel> apps, required UtilityLoadedState state}) {
+    csvKitBox.put(HiveConstants.SELECTED_APPS, apps.map((app) => app.appId).toList());
+    emit(state.copyWith(selectedApps: apps));
+  }
+
+  void updateSelectedPlatforms({required List<String> platforms, required UtilityLoadedState state}) {
+    csvKitBox.put(HiveConstants.SELECTED_PLATFORM, platforms);
+    emit(state.copyWith(selectedPlatforms: platforms));
+  }
+
+  void updateSelectedKeywords({required List<String> keywords, required UtilityLoadedState state}) {
+    emit(state.copyWith(selectedKeywords: keywords));
+  }
+
+  void updateSelectedCountries({required List<String> countries, required UtilityLoadedState state}) {
+    emit(state.copyWith(selectedCountries: countries));
+  }
+
+  void updateTotalCSVRows({required int totalCSVRows, required UtilityLoadedState state}) {
+    emit(state.copyWith(totalCSVRows: totalCSVRows));
+  }
+
+  void updateSplitCSVMaxRows({required int splitCSVMaxRows, required UtilityLoadedState state}) {
+    emit(state.copyWith(splitCSVMaxRows: splitCSVMaxRows));
   }
 }
