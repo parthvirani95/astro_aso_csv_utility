@@ -21,11 +21,7 @@ class CommonWidget {
         height: 36.r,
         width: 36.r,
         decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-        child: Icon(
-          Icons.keyboard_arrow_left_sharp,
-          size: 24.r,
-          color: AppColor.primaryColor,
-        ),
+        child: Icon(Icons.keyboard_arrow_left_sharp, size: 24.r, color: AppColor.primaryColor),
       ),
     );
   }
@@ -100,10 +96,9 @@ class CommonWidget {
                 sizesBox(width: 8.w),
                 Text(
                   "SocialX Repost+",
-                  style: Theme.of(context).textTheme.primaryBigBoldHeading.copyWith(
-                        color: Colors.white,
-                        fontSize: 22.sp,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.primaryBigBoldHeading.copyWith(color: Colors.white, fontSize: 22.sp),
                 ),
               ],
             ),
@@ -116,10 +111,7 @@ class CommonWidget {
 
   Widget toolTipWidget(BuildContext context, {required String message, Widget? child}) {
     return WidgetTooltip(
-      message: Text(
-        message,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColor.primary),
-      ),
+      message: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColor.primary)),
       messagePadding: EdgeInsets.all(12.r),
       triggerMode: WidgetTooltipTriggerMode.tap,
       direction: WidgetTooltipDirection.bottom,
@@ -128,12 +120,7 @@ class CommonWidget {
       triangleSize: const Size(16, 16),
       messageDecoration: BoxDecoration(color: Colors.green[900], borderRadius: BorderRadius.circular(12.r)),
       padding: EdgeInsets.all(16.r),
-      child: child ??
-          Icon(
-            CupertinoIcons.info_circle,
-            color: AppColor.inactiveIconColor,
-            size: 18.r,
-          ),
+      child: child ?? Icon(CupertinoIcons.info_circle, color: AppColor.inactiveIconColor, size: 18.r),
     );
   }
 
@@ -186,10 +173,9 @@ class CommonWidget {
           Expanded(
             child: Text(
               label ?? "",
-              style: Theme.of(context).textTheme.primaryBigBoldHeading.copyWith(
-                    color: fontColor ?? Colors.black,
-                    fontSize: 18.sp,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.primaryBigBoldHeading.copyWith(color: fontColor ?? Colors.black, fontSize: 18.sp),
             ),
           ),
           SizedBox(width: 12.w),
@@ -216,7 +202,11 @@ class CommonWidget {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                    color: Colors.white.multiplyOpacityNew(0.1), offset: Offset.zero, blurRadius: 3, spreadRadius: 0)
+                  color: Colors.white.multiplyOpacityNew(0.1),
+                  offset: Offset.zero,
+                  blurRadius: 3,
+                  spreadRadius: 0,
+                ),
               ],
               color: Colors.white.multiplyOpacityNew(0.2),
               borderRadius: BorderRadius.circular(26.r),
@@ -235,11 +225,10 @@ class CommonWidget {
           CommonWidget().sizesBox(height: 4.h),
           Text(
             label,
-            style: Theme.of(context).textTheme.primarySmallBoldHeading.copyWith(
-                  color: color ?? Colors.white,
-                  fontSize: 10.sp,
-                ),
-          )
+            style: Theme.of(
+              context,
+            ).textTheme.primarySmallBoldHeading.copyWith(color: color ?? Colors.white, fontSize: 10.sp),
+          ),
         ],
       ),
     );
@@ -262,10 +251,7 @@ class CommonWidget {
       child: Container(
         height: 50.h,
         width: 270.w,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          color: Colors.blue[50],
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.blue[50]),
         child: child,
       ),
     );
@@ -283,34 +269,39 @@ class CommonWidget {
       padding: const EdgeInsets.only(top: 5),
       child: Align(
         alignment: Alignment.topCenter,
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.primaryMediumBoldHeading.copyWith(color: color),
-        ),
+        child: Text(title, style: Theme.of(context).textTheme.primaryMediumBoldHeading.copyWith(color: color)),
       ),
     );
   }
 
-  Widget loadingIos({required BuildContext context}) {
-    return CupertinoActivityIndicator(
-      color: AppColor.appTextColor,
-      radius: 18.r,
+  Widget loadingIos({required BuildContext context, String? message}) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CupertinoActivityIndicator(color: Colors.white, radius: 12.r),
+          CommonWidget().sizesBox(height: 22),
+          Text(
+            message ?? 'Please wait...',
+            style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
+                  fontSize: 12.sp,
+                  color: Colors.white70,
+                ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget commonErrorWidget({required BuildContext context, required double maxHeight}) {
     return Container(
       color: Colors.white,
-      constraints: BoxConstraints(
-        minHeight: maxHeight,
-        minWidth: ScreenUtil().screenWidth,
-      ),
+      constraints: BoxConstraints(minHeight: maxHeight, minWidth: ScreenUtil().screenWidth),
       child: Center(
         child: Text(
           "Something went wrong, try again!",
-          style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
-                color: AppColor.appTextColor,
-              ),
+          style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(color: AppColor.appTextColor),
         ),
       ),
     );
@@ -318,11 +309,7 @@ class CommonWidget {
 
   Widget circularIndicator() {
     return const Center(
-      child: CircularProgressIndicator(
-        backgroundColor: Colors.white,
-        color: AppColor.appTextColor,
-        strokeWidth: 1,
-      ),
+      child: CircularProgressIndicator(backgroundColor: Colors.white, color: AppColor.appTextColor, strokeWidth: 1),
     );
   }
 
@@ -420,11 +407,7 @@ class CommonWidget {
             children: [
               removeImage
                   ? const SizedBox.shrink()
-                  : Lottie.asset(
-                      "assets/animation/data_not_found.json",
-                      width: 160.r,
-                      height: 160.r,
-                    ),
+                  : Lottie.asset("assets/animation/data_not_found.json", width: 160.r, height: 160.r),
               CommonWidget().sizesBox(height: 24),
               Text(
                 heading ?? '',
@@ -468,11 +451,7 @@ class CommonWidget {
   }
 
   Widget sizesBox({double? height, double? width, Widget? child}) {
-    return SizedBox(
-      height: height?.h,
-      width: width?.w,
-      child: child,
-    );
+    return SizedBox(height: height?.h, width: width?.w, child: child);
   }
 
   Widget commingSoon({required BuildContext context}) {
@@ -582,16 +561,10 @@ class CommonWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               heading.isNotEmpty
-                  ? Text(
-                      heading,
-                      style: Theme.of(context).textTheme.primaryMediumBoldHeading,
-                    )
+                  ? Text(heading, style: Theme.of(context).textTheme.primaryMediumBoldHeading)
                   : const SizedBox.shrink(),
               heading.isNotEmpty ? CommonWidget().sizesBox(height: 12) : const SizedBox.shrink(),
-              Text(
-                subHeading,
-                style: Theme.of(context).textTheme.primarySmallLightHeading,
-              ),
+              Text(subHeading, style: Theme.of(context).textTheme.primarySmallLightHeading),
               CommonWidget().sizesBox(height: 32),
               Row(
                 children: [
@@ -600,8 +573,10 @@ class CommonWidget {
                       onTap: nagativeCallback,
                       child: Container(
                         height: 40.h,
-                        decoration:
-                            BoxDecoration(borderRadius: BorderRadius.circular(26), color: AppColor.appTextColor),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(26),
+                          color: AppColor.appTextColor,
+                        ),
                         alignment: Alignment.center,
                         child: Text(
                           nagativeHeading,
@@ -616,8 +591,10 @@ class CommonWidget {
                       onTap: positiveCallback,
                       child: Container(
                         height: 40.h,
-                        decoration:
-                            BoxDecoration(borderRadius: BorderRadius.circular(26), color: AppColor.appTextColor),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(26),
+                          color: AppColor.appTextColor,
+                        ),
                         alignment: Alignment.center,
                         child: Text(
                           positiveHeading,
@@ -625,9 +602,9 @@ class CommonWidget {
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ],
@@ -648,10 +625,11 @@ class CommonWidget {
             padding: EdgeInsets.only(bottom: 20.h),
             child: Text(
               'tap_on_post',
-              style: Theme.of(context)
-                  .textTheme
-                  .primarySmallBoldHeading
-                  .copyWith(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.primarySmallBoldHeading.copyWith(
+                    color: Colors.white,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -682,10 +660,11 @@ class CommonWidget {
               padding: EdgeInsets.only(top: 32.h),
               child: Text(
                 'download_your_business_post',
-                style: Theme.of(context)
-                    .textTheme
-                    .primarySmallBoldHeading
-                    .copyWith(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.primarySmallBoldHeading.copyWith(
+                      color: Colors.white,
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
                 textAlign: TextAlign.end,
               ),
             ),
@@ -700,11 +679,7 @@ class CommonWidget {
   }
 
   Widget dividerLine({double? height}) {
-    return Divider(
-      color: AppColor.greyColor.multiplyOpacityNew(0.1),
-      thickness: 2,
-      height: height ?? 46.h,
-    );
+    return Divider(color: AppColor.greyColor.multiplyOpacityNew(0.1), thickness: 2, height: height ?? 46.h);
   }
 
   Widget showLikeAnimation({required AnimationController animationController}) {
@@ -795,12 +770,11 @@ class CommonWidget {
                     prefix ?? SizedBox(width: 32.r, height: 32.r),
                     Text(
                       labelConstants ?? "Repost",
-                      style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.primarySmallLightHeading.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
                     ),
-                    suffix ?? const SizedBox.shrink()
+                    suffix ?? const SizedBox.shrink(),
                   ],
                 ),
               ),
@@ -822,10 +796,7 @@ class CommonWidget {
         return Center(
           child: Container(
             width: ScreenUtil().screenWidth,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.r),
-              color: Colors.white,
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.r), color: Colors.white),
             margin: EdgeInsets.symmetric(horizontal: 16.w),
             padding: EdgeInsets.all(12.r),
             child: Column(
@@ -847,7 +818,7 @@ class CommonWidget {
                               offset: Offset.zero,
                               blurRadius: 3,
                               spreadRadius: 0,
-                            )
+                            ),
                           ],
                           color: AppColor.blackBackgroundColor,
                           borderRadius: BorderRadius.circular(26.r),
@@ -885,7 +856,7 @@ class CommonWidget {
                             offset: const Offset(0, 1),
                             blurRadius: 2,
                             spreadRadius: 2,
-                          )
+                          ),
                         ],
                       ),
                       child: Row(
@@ -894,11 +865,7 @@ class CommonWidget {
                         children: [
                           Padding(
                             padding: EdgeInsets.all(2.r),
-                            child: Icon(
-                              Icons.play_arrow_outlined,
-                              color: Colors.white,
-                              size: 36.r,
-                            ),
+                            child: Icon(Icons.play_arrow_outlined, color: Colors.white, size: 36.r),
                           ),
                           CommonWidget().sizesBox(width: 4.w),
                           Padding(
@@ -931,9 +898,7 @@ class CommonWidget {
                     ),
                     Text(
                       "OR",
-                      style: Theme.of(context).textTheme.primarySmallBoldHeading.copyWith(
-                            color: Colors.black,
-                          ),
+                      style: Theme.of(context).textTheme.primarySmallBoldHeading.copyWith(color: Colors.black),
                     ),
                     Expanded(
                       child: Divider(
@@ -962,7 +927,7 @@ class CommonWidget {
                             offset: const Offset(0, 1),
                             blurRadius: 2,
                             spreadRadius: 2,
-                          )
+                          ),
                         ],
                       ),
                       child: Row(
@@ -977,7 +942,7 @@ class CommonWidget {
                                   offset: Offset.zero,
                                   blurRadius: 3,
                                   spreadRadius: 0,
-                                )
+                                ),
                               ],
                               color: Colors.white.multiplyOpacityNew(0.2),
                               borderRadius: BorderRadius.circular(26.r),

@@ -1,5 +1,4 @@
 import 'package:astro_aso_csv_utility/shared/di/get_it.dart';
-import 'package:astro_aso_csv_utility/shared/extention/theme_extension.dart';
 import 'package:astro_aso_csv_utility/shared/themes/app_color.dart';
 import 'package:astro_aso_csv_utility/views/cubits/dashboard/dashboard_cubit.dart';
 import 'package:astro_aso_csv_utility/views/widgets/common_widget.dart';
@@ -15,7 +14,6 @@ class DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<DashboardView> with SingleTickerProviderStateMixin {
-  bool isNativeLoad = false;
   BuildContext? buildContext;
   late final DashboardCubit dashboardCubit;
 
@@ -36,20 +34,21 @@ class _DashboardViewState extends State<DashboardView> with SingleTickerProvider
     buildContext = context;
 
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: BlocBuilder<DashboardCubit, DashboardState>(
-          bloc: dashboardCubit,
-          builder: (_, state) {
-            if (state is DashboardLoadingState) {
-              return loadingView(context);
-            } else if (state is DashboardErrorState) {
-              return dashboardErrorView(context: context, state: state);
-            } else if (state is DashboardLoadedState) {
-              return Container();
-            }
-            return const SizedBox.shrink();
-          },
-        ));
+      resizeToAvoidBottomInset: false,
+      body: BlocBuilder<DashboardCubit, DashboardState>(
+        bloc: dashboardCubit,
+        builder: (_, state) {
+          if (state is DashboardLoadingState) {
+            return CommonWidget().loadingIos(context: context);
+          } else if (state is DashboardErrorState) {
+            return dashboardErrorView(context: context, state: state);
+          } else if (state is DashboardLoadedState) {
+            return Container();
+          }
+          return const SizedBox.shrink();
+        },
+      ),
+    );
   }
 
   Widget dashboardErrorView({required BuildContext context, required DashboardErrorState state}) {
@@ -63,26 +62,6 @@ class _DashboardViewState extends State<DashboardView> with SingleTickerProvider
         fontColor: AppColor.whiteColor,
         buttonFontColor: AppColor.blackColor,
         padding: EdgeInsets.only(bottom: 30.h),
-      ),
-    );
-  }
-
-  Widget loadingView(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CommonWidget().loadingIos(context: context),
-          CommonWidget().sizesBox(height: 22),
-          Text(
-            'Please wait...',
-            style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
-                  fontSize: 12.sp,
-                  color: Colors.white70,
-                ),
-          ),
-        ],
       ),
     );
   }

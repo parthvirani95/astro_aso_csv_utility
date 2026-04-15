@@ -1,0 +1,13 @@
+{
+  "dart.flutterSdkPath": "/Users/parthvirani/development/flutter",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "cSpell.enableFiletypes": [
+    "!javascript",
+    "!typescript",
+    "!python",
+    "!markdown"
+  ],
+  "java.compile.nullAnalysis.mode": "automatic"
+}
