@@ -5,7 +5,6 @@ import 'package:astro_aso_csv_utility/models/app_list_model.dart';
 import 'package:astro_aso_csv_utility/shared/constants/hive_constants.dart';
 import 'package:astro_aso_csv_utility/shared/constants/snackbar_type.dart';
 import 'package:astro_aso_csv_utility/shared/utils/app_error.dart';
-import 'package:astro_aso_csv_utility/shared/utils/app_functions.dart';
 import 'package:astro_aso_csv_utility/shared/utils/custom_snackbar.dart';
 import 'package:astro_aso_csv_utility/shared/utils/database_helper.dart';
 import 'package:astro_aso_csv_utility/views/cubits/loading/loading_cubit.dart';
@@ -1243,7 +1242,7 @@ class UtlityCubit extends Cubit<UtilityState> {
 
     String twoDigits(int n) => n.toString().padLeft(2, '0');
 
-    return "${utc.year}-"
+    return "${twoDigits(utc.year)}-"
         "${twoDigits(utc.month)}-"
         "${twoDigits(utc.day)} "
         "${twoDigits(utc.hour)}:"
@@ -1255,7 +1254,7 @@ class UtlityCubit extends Cubit<UtilityState> {
   String fileExportUTC() {
     final utc = DateTime.now().toUtc();
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    return "${utc.year}${twoDigits(utc.month)}${twoDigits(utc.day)}${twoDigits(utc.hour)}${twoDigits(utc.minute)}${twoDigits(utc.second)}${utc.millisecond}";
+    return "${utc.year}${twoDigits(utc.month)}${twoDigits(utc.day)}_${twoDigits(utc.hour)}${twoDigits(utc.minute)}${twoDigits(utc.second)}_${utc.microsecondsSinceEpoch}";
   }
 
   Future<void> openFullDiskAccessSettings() async {
@@ -1266,6 +1265,8 @@ class UtlityCubit extends Cubit<UtilityState> {
     try {
       loadingCubit.show();
       loadingCubit.showMessageAndLoading(message: "Preparing & Exporting CSV...", showCancelButton: false);
+
+      List<List<dynamic>> rows = [];
 
       if (state is UtilityLoadedState) {
         final st = state as UtilityLoadedState;
@@ -1286,13 +1287,21 @@ class UtlityCubit extends Cubit<UtilityState> {
           return;
         }
 
-        List<String> csvRows = [
-          "App Name,App Id,Platform,Keyword,Store Domain,Store,Note,Last Update,Ranking,Change,Popularity,Difficulty,Apps in Ranking",
-        ];
-
-        print(csvRows);
-
-        List<dynamic> csvData = [];
+        rows.add([
+          "App Name",
+          "App Id",
+          "Platform",
+          "Keyword",
+          "Store Domain",
+          "Store",
+          "Note",
+          "Last Update",
+          "Ranking",
+          "Change",
+          "Popularity",
+          "Difficulty",
+          "Apps in Ranking",
+        ]);
 
         for (int i = 0; i < apps.length; i++) {
           for (int j = 0; j < platforms.length; j++) {
@@ -1300,18 +1309,12 @@ class UtlityCubit extends Cubit<UtilityState> {
               for (int l = 0; l < countries.length; l++) {
                 String appName = apps[i].name.toString();
                 int appId = apps[i].appId;
-
-                String appPlatform = platformMap.entries.toList().where((e) => e.value == platforms[j]).first.key;
-
-                String platform = appPlatform;
+                String platform = platforms[j];
                 String keyword = keywords[k];
-
                 String countryName = countries[l];
                 String countryCode = countryCodeMap[countryName] ?? "";
-
                 String storeDomain = countryCode;
-                String storeName = astroCountryMap[countryCode] ?? "";
-
+                String storeName = countryName;
                 String note = "";
                 String lastUpdate = formatUtc();
                 int ranking = 0;
@@ -1320,7 +1323,7 @@ class UtlityCubit extends Cubit<UtilityState> {
                 int difficulty = 0;
                 int appsInRanking = 0;
 
-                csvData.add(
+                rows.add(
                   [
                     appName,
                     appId,
@@ -1342,13 +1345,9 @@ class UtlityCubit extends Cubit<UtilityState> {
           }
         }
 
-        List<List<dynamic>> rows = [];
-        rows.addAll([csvRows]);
-        rows.addAll([csvData]);
-
         String csv = const ListToCsvConverter().convert(rows);
 
-        String fileName = "keywords_${fileExportUTC()}.csv";
+        String fileName = "kwd_${fileExportUTC()}.csv";
 
         // Ask user where to save
         final saveLocation = await getSaveLocation(
@@ -1371,15 +1370,22 @@ class UtlityCubit extends Cubit<UtilityState> {
         await csvKitBox.put(HiveConstants.LAST_CSV_EXPORT_PATH, lastCSVExportPath);
         await file.saveTo(saveLocation.path);
 
-        int totalCSVFiles = (totalCSVRows / splitCSVMaxRows).ceil();
-        if (totalCSVFiles == 1) {
-          // Only one CSV file will be exported
+        if (totalCSVRows != 0 && splitCSVMaxRows != 0 && totalCSVRows > splitCSVMaxRows) {
+          int totalCSVFiles = (totalCSVRows / splitCSVMaxRows).ceil();
+          if (totalCSVFiles == 1) {
+            // Export CSV to multiple files
+          }
         }
+
+        CustomSnackbar.show(snackbarType: SnackbarType.SUCCESS, message: "CSV exported successfully");
+
+        try {
+          Process.run('open', [lastCSVExportPath]);
+        } catch (_) {}
 
         loadingCubit.hide();
       }
     } catch (e) {
-      print(e);
       CustomSnackbar.show(snackbarType: SnackbarType.ERROR, message: "Error exporting CSV: $e");
       loadingCubit.hide();
     } finally {
