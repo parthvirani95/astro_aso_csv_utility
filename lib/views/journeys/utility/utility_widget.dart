@@ -6,9 +6,11 @@ import 'package:astro_aso_csv_utility/views/cubits/utility/utility_cubit.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/app_list_view.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/countries_view.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/keyword_view.dart';
+import 'package:astro_aso_csv_utility/views/journeys/utility/max_csv_row.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/platforms_view.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/utility_view.dart';
 import 'package:astro_aso_csv_utility/views/widgets/common_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -105,22 +107,16 @@ abstract class UtilityWidget extends State<UtilityView> {
                   CommonWidget().sizesBox(height: 12),
                   selectedCountriesView(context: context, state: state),
                   CommonWidget().sizesBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CommonWidget().containerField(
-                            context: context, title: "Total CSV Rows : ", width: ScreenUtil().screenWidth),
-                      ),
-                      CommonWidget().sizesBox(width: 12),
-                      Expanded(
-                        child: CommonWidget().containerField(
-                          context: context,
-                          title: "Split CSV (Max Rows per CSV) : ",
-                          width: ScreenUtil().screenWidth,
-                        ),
-                      ),
-                    ],
-                  )
+                  if (state.totalCSVRows > 0)
+                    Row(
+                      children: [
+                        if (state.totalCSVRows > 0) Expanded(child: totalCSVRowsView(context: context, state: state)),
+                        if (state.totalCSVRows > 100 || kDebugMode) ...[
+                          CommonWidget().sizesBox(width: 12),
+                          Expanded(child: maxCSVRowsView(context: context, state: state))
+                        ],
+                      ],
+                    )
                 ],
               ),
             ),
@@ -345,6 +341,61 @@ abstract class UtilityWidget extends State<UtilityView> {
     );
   }
 
+  Widget totalCSVRowsView({required BuildContext context, required UtilityLoadedState state}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.greyColor.withOpacityNew(0.1),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColor.greyColor.withOpacityNew(0.1)),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 8.r),
+      child: Row(
+        children: [
+          CommonWidget().sizesBox(width: 8),
+          optionHeading(context: context, label: "Total CSV Rows"),
+          Spacer(),
+          Align(
+            alignment: Alignment.centerRight,
+            child: CommonWidget().containerField(context: context, title: "${state.totalCSVRows}"),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget maxCSVRowsView({required BuildContext context, required UtilityLoadedState state}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.greyColor.withOpacityNew(0.1),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColor.greyColor.withOpacityNew(0.1)),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 8.r),
+      child: Row(
+        children: [
+          CommonWidget().sizesBox(width: 8),
+          optionHeading(context: context, label: "Split CSV (Max Rows per CSV)"),
+          CommonWidget().sizesBox(width: 8),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: CommonWidget().containerField(
+                context: context,
+                title: state.splitCSVMaxRows > 0
+                    ? ("${state.splitCSVMaxRows} rows per CSV : ${(state.totalCSVRows / state.splitCSVMaxRows).ceil()} CSV files")
+                    : "${state.totalCSVRows} rows : 1 CSV file",
+                onTap: () async => await bottomSheet(
+                  context: context,
+                  child: MaxCSVRows(utilityCubit: utilityCubit, state: state),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   Future<void> bottomSheet({required BuildContext context, required Widget child}) async {
     await showModalBottomSheet(
       context: context,
@@ -400,7 +451,7 @@ abstract class UtilityWidget extends State<UtilityView> {
                 fontWeight: FontWeight.w600,
               ),
           borderRadius: 12.r,
-          onTap: () async => await utilityCubit.exportCSV(state: state),
+          onTap: () async => await utilityCubit.exportCSV(),
         ),
       ),
     );

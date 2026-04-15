@@ -1001,6 +1001,8 @@ class UtlityCubit extends Cubit<UtilityState> {
         final splitCSVMaxRows = await csvKitBox.get(HiveConstants.SPLIT_CSV_MAX_ROWS, defaultValue: 0);
         final filteredAppList = appList.where((app) => hiveApps.contains(app.appId)).toList();
 
+        int totalCSVRows = filteredAppList.length * hivePlatforms.length * hiveKeywords.length * hiveCountries.length;
+
         emit(
           UtilityLoadedState(
             appList: appList,
@@ -1008,7 +1010,7 @@ class UtlityCubit extends Cubit<UtilityState> {
             selectedPlatforms: hivePlatforms,
             selectedKeywords: hiveKeywords,
             selectedCountries: hiveCountries,
-            totalCSVRows: 0,
+            totalCSVRows: totalCSVRows,
             splitCSVMaxRows: splitCSVMaxRows,
           ),
         );
@@ -1145,16 +1147,53 @@ class UtlityCubit extends Cubit<UtilityState> {
     Process.run('open', ['x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles']);
   }
 
-  Future<void> exportCSV({required UtilityLoadedState state}) async {}
+  Future<void> exportCSV() async {
+    try {
+      loadingCubit.show();
+      loadingCubit.showMessageAndLoading(message: "Preparing & Exporting CSV...", showCancelButton: false);
+
+      if (state is UtilityLoadedState) {
+        final st = state as UtilityLoadedState;
+        final apps = st.selectedApps;
+        final platforms = st.selectedPlatforms;
+        final keywords = st.selectedKeywords;
+        final countries = st.selectedCountries;
+        final splitCSVMaxRows = st.splitCSVMaxRows;
+
+        int totalCSVRows = apps.length * platforms.length * keywords.length * countries.length;
+
+        if (totalCSVRows == 0) {
+          CustomSnackbar.show(
+            snackbarType: SnackbarType.ERROR,
+            message: "Please select at least one app, platform, keyword, and country",
+          );
+          loadingCubit.hide();
+          return;
+        }
+
+        int totalCSVFiles = (totalCSVRows / splitCSVMaxRows).ceil();
+
+        if (totalCSVFiles == 0) {
+          // Only one CSV file will be exported
+        }
+
+        loadingCubit.hide();
+      }
+    } catch (_) {
+      loadingCubit.hide();
+    }
+  }
 
   void updateSelectedApps({required List<AppListModel> apps, required UtilityLoadedState state}) {
     csvKitBox.put(HiveConstants.SELECTED_APPS, apps.map((app) => app.appId).toList());
     emit(state.copyWith(selectedApps: apps));
+    calculateTotalCSVRows();
   }
 
   void updateSelectedPlatforms({required List<String> platforms, required UtilityLoadedState state}) {
     csvKitBox.put(HiveConstants.SELECTED_PLATFORM, platforms);
     emit(state.copyWith(selectedPlatforms: platforms));
+    calculateTotalCSVRows();
   }
 
   void updateSelectedKeywords({required List<String> keywords, required UtilityLoadedState state}) {
@@ -1165,14 +1204,33 @@ class UtlityCubit extends Cubit<UtilityState> {
   void updateSelectedCountries({required List<String> countries, required UtilityLoadedState state}) {
     csvKitBox.put(HiveConstants.SELECTED_COUNTRIES, countries);
     emit(state.copyWith(selectedCountries: countries));
-  }
-
-  void updateTotalCSVRows({required int totalCSVRows, required UtilityLoadedState state}) {
-    emit(state.copyWith(totalCSVRows: totalCSVRows));
+    calculateTotalCSVRows();
   }
 
   void updateSplitCSVMaxRows({required int splitCSVMaxRows, required UtilityLoadedState state}) {
     csvKitBox.put(HiveConstants.SPLIT_CSV_MAX_ROWS, splitCSVMaxRows);
     emit(state.copyWith(splitCSVMaxRows: splitCSVMaxRows));
+    calculateTotalCSVRows();
+  }
+
+  void calculateTotalCSVRows() {
+    if (state is UtilityLoadedState) {
+      final st = state as UtilityLoadedState;
+      final apps = st.selectedApps;
+      final platforms = st.selectedPlatforms;
+      final keywords = st.selectedKeywords;
+      final countries = st.selectedCountries;
+
+      int totalCSVRows = 0;
+
+      if (apps.isEmpty || platforms.isEmpty || keywords.isEmpty || countries.isEmpty) {
+        emit(st.copyWith(totalCSVRows: 0));
+        return;
+      }
+
+      totalCSVRows += apps.length * platforms.length * keywords.length * countries.length;
+
+      emit(st.copyWith(totalCSVRows: totalCSVRows));
+    }
   }
 }

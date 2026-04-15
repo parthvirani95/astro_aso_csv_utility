@@ -248,6 +248,39 @@ class _CountriesViewState extends State<CountriesView> {
                   ],
                 ),
         ),
+        CommonWidget().sizesBox(height: 12),
+        Text(
+          "If you select country then it will select the languages that are supported by that country\n(e.g. if you select United States then it will select all the languages that are supported by United States )",
+          style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
+                fontSize: 12.sp,
+                color: AppColor.whiteColor,
+                height: 1.5,
+              ),
+          textAlign: TextAlign.center,
+        ),
+        InkWell(
+          onTap: () async {
+            String url = "https://tryastro.app/tools/localizations/";
+            bool canLaunch = await canLaunchUrl(Uri.parse(url));
+            if (canLaunch) {
+              await launchUrl(Uri.parse(url));
+            } else {
+              CustomSnackbar.show(snackbarType: SnackbarType.ERROR, message: "Could not launch the URL");
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 8.r),
+            child: Text(
+              "Tap for more info : https://tryastro.app/tools/localizations/",
+              style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
+                    fontSize: 12.sp,
+                    color: AppColor.whiteColor,
+                    height: 1.5,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
       ],
     );
   }

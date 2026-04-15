@@ -1,5 +1,4 @@
 import 'package:astro_aso_csv_utility/shared/extention/color_extension.dart';
-import 'package:astro_aso_csv_utility/shared/extention/theme_extension.dart';
 import 'package:astro_aso_csv_utility/shared/themes/app_color.dart';
 import 'package:astro_aso_csv_utility/views/cubits/loading/loading_cubit.dart';
 import 'package:astro_aso_csv_utility/views/widgets/common_widget.dart';
@@ -14,40 +13,36 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loadingCubit = BlocProvider.of<LoadingCubit>(context);
     return Stack(
       fit: StackFit.expand,
       children: [
         Container(child: screen),
         BlocBuilder<LoadingCubit, double>(
+          bloc: loadingCubit,
           builder: (context, shouldShow) {
             if (shouldShow > 0) {
               return Container(
                 color: Colors.black.multiplyOpacityNew(0.6),
                 width: ScreenUtil().screenWidth,
                 height: ScreenUtil().screenHeight,
-                child: BlocProvider.of<LoadingCubit>(context).loadingMessage.trim().isNotEmpty
+                child: loadingCubit.loadingMessage.trim().isNotEmpty
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CommonWidget().loadingIos(context: context),
-                          CommonWidget().sizesBox(height: 32),
-                          Text(
-                            BlocProvider.of<LoadingCubit>(context).loadingMessage,
-                            style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
-                                  color: Colors.white,
-                                  height: 1.8,
-                                ),
-                            textAlign: TextAlign.center,
+                          CommonWidget().loadingIos(
+                            context: context,
+                            message: loadingCubit.loadingMessage,
                           ),
-                          if (BlocProvider.of<LoadingCubit>(context).showCancelButton)
-                            CommonWidget().sizesBox(height: 32),
-                          if (BlocProvider.of<LoadingCubit>(context).showCancelButton)
+                          CommonWidget().sizesBox(height: 32),
+                          if (loadingCubit.showCancelButton) CommonWidget().sizesBox(height: 32),
+                          if (loadingCubit.showCancelButton)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8.r),
                               child: InkWell(
                                 onTap: () {
-                                  BlocProvider.of<LoadingCubit>(context).isProcessTerminated = true;
-                                  BlocProvider.of<LoadingCubit>(context).hide();
+                                  loadingCubit.isProcessTerminated = true;
+                                  loadingCubit.hide();
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
