@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:astro_aso_csv_utility/globals.dart';
 import 'package:astro_aso_csv_utility/shared/constants/hive_constants.dart';
 import 'package:astro_aso_csv_utility/shared/di/get_it.dart' as get_it;
-import 'package:astro_aso_csv_utility/views/appverse_app.dart';
+import 'package:astro_aso_csv_utility/views/securelab_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -29,12 +29,7 @@ Future<void> mainFunction() async {
 
   Hive.init('$csvKitDocumentPath${Platform.pathSeparator}localDb');
 
-  locaKitBox = await Hive.openBox(HiveBoxConstants.LOCAKIT_AI_BOX);
-  appLanguageBox = await Hive.openBox(HiveBoxConstants.APP_LANGUAGE_BOX);
-
-  isFirst = await locaKitBox.get(HiveConstants.IS_FIRST_LOAD, defaultValue: true);
-  launchNo = await locaKitBox.get(HiveConstants.LAUNCH_NUMBER, defaultValue: 0);
-  currentLangCode = await appLanguageBox.get(HiveConstants.PREFERRED_LANGUAGE, defaultValue: 'en');
+  csvKitBox = await Hive.openBox(HiveBoxConstants.CSVKIT_BOX);
 
   unawaited(get_it.init());
 
@@ -44,7 +39,7 @@ Future<void> mainFunction() async {
   final Catcher2Options releaseOptions = Catcher2Options(SilentReportMode(), [ConsoleHandler()]);
 
   Catcher2(
-    rootWidget: const AppVerseApp(),
+    rootWidget: const SecureLabApp(),
     ensureInitialized: true,
     enableLogger: true,
     debugConfig: debugOptions,

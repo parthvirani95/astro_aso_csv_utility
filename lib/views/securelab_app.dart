@@ -10,21 +10,20 @@ import 'package:astro_aso_csv_utility/shared/utils/fade_page_route_builder.dart'
 import 'package:astro_aso_csv_utility/views/cubits/loading/loading_cubit.dart';
 import 'package:astro_aso_csv_utility/views/journeys/loading/loading_screen.dart';
 import 'package:catcher_2/catcher_2.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:astro_aso_csv_utility/globals.dart';
 
-class AppVerseApp extends StatefulWidget {
-  const AppVerseApp({super.key});
+class SecureLabApp extends StatefulWidget {
+  const SecureLabApp({super.key});
 
   @override
-  State<AppVerseApp> createState() => _AppVerseAppState();
+  State<SecureLabApp> createState() => _SecureLabAppState();
 }
 
-class _AppVerseAppState extends State<AppVerseApp> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+class _SecureLabAppState extends State<SecureLabApp> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late LoadingCubit _loadingCubit;
 
   @override
@@ -33,7 +32,6 @@ class _AppVerseAppState extends State<AppVerseApp> with WidgetsBindingObserver, 
     _loadingCubit = getItInstance<LoadingCubit>();
     WidgetsBinding.instance.addObserver(this);
     _initilize();
-    isNewDownloadedPost = true;
   }
 
   BuildContext? rootContext;
@@ -126,10 +124,6 @@ class _AppVerseAppState extends State<AppVerseApp> with WidgetsBindingObserver, 
                 },
                 initialRoute: RouteList.initial,
                 onGenerateRoute: (RouteSettings settings) {
-                  if (kDebugMode) {
-                    print(settings.name);
-                  }
-                  routeArguments = settings.arguments;
                   final routes = Routes.getRoutes(settings);
                   final WidgetBuilder? builder = routes[settings.name];
                   return SlidePageRouteBuilder(
