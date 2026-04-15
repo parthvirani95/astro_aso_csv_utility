@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:astro_aso_csv_utility/globals.dart';
 import 'package:astro_aso_csv_utility/views/cubits/loading/loading_cubit.dart';
-import 'package:astro_aso_csv_utility/views/journeys/dashboard/dashboard_view.dart';
+import 'package:astro_aso_csv_utility/views/journeys/utility/utility_view.dart';
 import 'package:astro_aso_csv_utility/views/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,7 +54,7 @@ class _AppVerseHomeState extends State<AppVerseHome> {
         final result = await onWillPop(context: context);
         return result;
       },
-      child: Scaffold(key: scaffoldKey, resizeToAvoidBottomInset: false, body: const DashboardView()),
+      child: Scaffold(key: scaffoldKey, resizeToAvoidBottomInset: false, body: const UtilityView()),
     );
   }
 }

@@ -28,14 +28,10 @@ Future<void> mainFunction() async {
       '${(await path_provider.getApplicationDocumentsDirectory()).absolute.path}${Platform.pathSeparator}CSVKit';
 
   Hive.init('$csvKitDocumentPath${Platform.pathSeparator}localDb');
-
   csvKitBox = await Hive.openBox(HiveBoxConstants.CSVKIT_BOX);
-
   unawaited(get_it.init());
 
   final Catcher2Options debugOptions = Catcher2Options(SilentReportMode(), [ConsoleHandler()]);
-
-  /// Release configuration. Same as above, but once user accepts dialog, user will be prompted to send email with crash to support.
   final Catcher2Options releaseOptions = Catcher2Options(SilentReportMode(), [ConsoleHandler()]);
 
   Catcher2(
