@@ -5,12 +5,15 @@ import 'package:astro_aso_csv_utility/models/app_list_model.dart';
 import 'package:astro_aso_csv_utility/shared/constants/hive_constants.dart';
 import 'package:astro_aso_csv_utility/shared/constants/snackbar_type.dart';
 import 'package:astro_aso_csv_utility/shared/utils/app_error.dart';
+import 'package:astro_aso_csv_utility/shared/utils/app_functions.dart';
 import 'package:astro_aso_csv_utility/shared/utils/custom_snackbar.dart';
 import 'package:astro_aso_csv_utility/shared/utils/database_helper.dart';
 import 'package:astro_aso_csv_utility/views/cubits/loading/loading_cubit.dart';
 import 'package:bloc/bloc.dart';
+import 'package:csv/csv.dart';
 import 'package:equatable/equatable.dart';
-
+import 'package:file_selector/file_selector.dart';
+import 'package:flutter/services.dart';
 part 'utility_state.dart';
 
 Map<String, String> localeLanguageMap = {
@@ -967,6 +970,98 @@ String databaseAccessMsg = '''
   You can also select the Astro folder manually if needed.
   ''';
 
+Map<String, String> astroCountryMap = {
+  "ae": "🇦🇪 United Arab Emirates",
+  "al": "🇦🇱 Albania",
+  "ar": "🇦🇷 Argentina",
+  "at": "🇦🇹 Austria",
+  "au": "🇦🇺 Australia",
+  "az": "🇦🇿 Azerbaijan",
+  "be": "🇧🇪 Belgium",
+  "bg": "🇧🇬 Bulgaria",
+  "bh": "🇧🇭 Bahrain",
+  "bo": "🇧🇴 Bolivia",
+  "br": "🇧🇷 Brazil",
+  "ca": "🇨🇦 Canada",
+  "ch": "🇨🇭 Switzerland",
+  "cl": "🇨🇱 Chile",
+  "cn": "🇨🇳 China",
+  "co": "🇨🇴 Colombia",
+  "cr": "🇨🇷 Costa Rica",
+  "cy": "🇨🇾 Cyprus",
+  "cz": "🇨🇿 Czech Republic",
+  "de": "🇩🇪 Germany",
+  "dk": "🇩🇰 Denmark",
+  "do": "🇩🇴 Dominican Republic",
+  "dz": "🇩🇿 Algeria",
+  "ec": "🇪🇨 Ecuador",
+  "ee": "🇪🇪 Estonia",
+  "eg": "🇪🇬 Egypt",
+  "es": "🇪🇸 Spain",
+  "fi": "🇫🇮 Finland",
+  "fr": "🇫🇷 France",
+  "gb": "🇬🇧 UK",
+  "gh": "🇬🇭 Ghana",
+  "gr": "🇬🇷 Greece",
+  "gt": "🇬🇹 Guatemala",
+  "hk": "🇭🇰 Hong Kong",
+  "hn": "🇭🇳 Honduras",
+  "hr": "🇭🇷 Croatia",
+  "hu": "🇭🇺 Hungary",
+  "id": "🇮🇩 Indonesia",
+  "ie": "🇮🇪 Ireland",
+  "il": "🇮🇱 Israel",
+  "in": "🇮🇳 India",
+  "iq": "🇮🇶 Iraq",
+  "is": "🇮🇸 Iceland",
+  "it": "🇮🇹 Italy",
+  "jo": "🇯🇴 Jordan",
+  "jp": "🇯🇵 Japan",
+  "ke": "🇰🇪 Kenya",
+  "kg": "🇰🇬 Kyrgyzstan",
+  "kh": "🇰🇭 Cambodia",
+  "kr": "🇰🇷 South Korea",
+  "kw": "🇰🇼 Kuwait",
+  "kz": "🇰🇿 Kazakhstan",
+  "lb": "🇱🇧 Lebanon",
+  "lk": "🇱🇰 Sri Lanka",
+  "lu": "🇱🇺 Luxembourg",
+  "lv": "🇱🇻 Latvia",
+  "ma": "🇲🇦 Morocco",
+  "mn": "🇲🇳 Mongolia",
+  "mo": "🇲🇴 Macao",
+  "mx": "🇲🇽 Mexico",
+  "my": "🇲🇾 Malaysia",
+  "nl": "🇳🇱 Netherlands",
+  "no": "🇳🇴 Norway",
+  "np": "🇳🇵 Nepal",
+  "nz": "🇳🇿 New Zealand",
+  "om": "🇴🇲 Oman",
+  "pa": "🇵🇦 Panama",
+  "pe": "🇵🇪 Peru",
+  "ph": "🇵🇭 Philippines",
+  "pk": "🇵🇰 Pakistan",
+  "pl": "🇵🇱 Poland",
+  "pt": "🇵🇹 Portugal",
+  "py": "🇵🇾 Paraguay",
+  "qa": "🇶🇦 Qatar",
+  "ro": "🇷🇴 Romania",
+  "ru": "🇷🇺 Russia",
+  "sa": "🇸🇦 Saudi Arabia",
+  "se": "🇸🇪 Sweden",
+  "sg": "🇸🇬 Singapore",
+  "sk": "🇸🇰 Slovakia",
+  "sv": "🇸🇻 El Salvador",
+  "th": "🇹🇭 Thailand",
+  "tr": "🇹🇷 Turkey",
+  "tw": "🇹🇼 Taiwan",
+  "ua": "🇺🇦 Ukraine",
+  "us": "🇺🇸 US",
+  "uz": "🇺🇿 Uzbekistan",
+  "vn": "🇻🇳 Vietnam",
+  "za": "🇿🇦 South Africa",
+};
+
 class UtlityCubit extends Cubit<UtilityState> {
   final LoadingCubit loadingCubit;
 
@@ -1143,6 +1238,26 @@ class UtlityCubit extends Cubit<UtilityState> {
     }
   }
 
+  String formatUtc() {
+    final utc = DateTime.now().toUtc();
+
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+
+    return "${utc.year}-"
+        "${twoDigits(utc.month)}-"
+        "${twoDigits(utc.day)} "
+        "${twoDigits(utc.hour)}:"
+        "${twoDigits(utc.minute)}:"
+        "${twoDigits(utc.second)} "
+        "+0000";
+  }
+
+  String fileExportUTC() {
+    final utc = DateTime.now().toUtc();
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    return "${utc.year}${twoDigits(utc.month)}${twoDigits(utc.day)}${twoDigits(utc.hour)}${twoDigits(utc.minute)}${twoDigits(utc.second)}${utc.millisecond}";
+  }
+
   Future<void> openFullDiskAccessSettings() async {
     Process.run('open', ['x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles']);
   }
@@ -1171,15 +1286,103 @@ class UtlityCubit extends Cubit<UtilityState> {
           return;
         }
 
-        int totalCSVFiles = (totalCSVRows / splitCSVMaxRows).ceil();
+        List<String> csvRows = [
+          "App Name,App Id,Platform,Keyword,Store Domain,Store,Note,Last Update,Ranking,Change,Popularity,Difficulty,Apps in Ranking",
+        ];
 
-        if (totalCSVFiles == 0) {
+        print(csvRows);
+
+        List<dynamic> csvData = [];
+
+        for (int i = 0; i < apps.length; i++) {
+          for (int j = 0; j < platforms.length; j++) {
+            for (int k = 0; k < keywords.length; k++) {
+              for (int l = 0; l < countries.length; l++) {
+                String appName = apps[i].name.toString();
+                int appId = apps[i].appId;
+
+                String appPlatform = platformMap.entries.toList().where((e) => e.value == platforms[j]).first.key;
+
+                String platform = appPlatform;
+                String keyword = keywords[k];
+
+                String countryName = countries[l];
+                String countryCode = countryCodeMap[countryName] ?? "";
+
+                String storeDomain = countryCode;
+                String storeName = astroCountryMap[countryCode] ?? "";
+
+                String note = "";
+                String lastUpdate = formatUtc();
+                int ranking = 0;
+                int change = 0;
+                int popularity = 0;
+                int difficulty = 0;
+                int appsInRanking = 0;
+
+                csvData.add(
+                  [
+                    appName,
+                    appId,
+                    platform,
+                    keyword,
+                    storeDomain,
+                    storeName,
+                    note,
+                    lastUpdate,
+                    ranking,
+                    change,
+                    popularity,
+                    difficulty,
+                    appsInRanking,
+                  ],
+                );
+              }
+            }
+          }
+        }
+
+        List<List<dynamic>> rows = [];
+        rows.addAll([csvRows]);
+        rows.addAll([csvData]);
+
+        String csv = const ListToCsvConverter().convert(rows);
+
+        String fileName = "keywords_${fileExportUTC()}.csv";
+
+        // Ask user where to save
+        final saveLocation = await getSaveLocation(
+          suggestedName: fileName,
+          initialDirectory: lastCSVExportPath,
+          acceptedTypeGroups: [
+            const XTypeGroup(label: 'CSV', extensions: ['csv'])
+          ],
+        );
+
+        if (saveLocation == null) {
+          CustomSnackbar.show(snackbarType: SnackbarType.ERROR, message: "No save location selected");
+          loadingCubit.hide();
+          return;
+        }
+
+        final file = XFile.fromData(Uint8List.fromList(csv.codeUnits), mimeType: 'text/csv', name: fileName);
+
+        lastCSVExportPath = File(saveLocation.path).parent.path;
+        await csvKitBox.put(HiveConstants.LAST_CSV_EXPORT_PATH, lastCSVExportPath);
+        await file.saveTo(saveLocation.path);
+
+        int totalCSVFiles = (totalCSVRows / splitCSVMaxRows).ceil();
+        if (totalCSVFiles == 1) {
           // Only one CSV file will be exported
         }
 
         loadingCubit.hide();
       }
-    } catch (_) {
+    } catch (e) {
+      print(e);
+      CustomSnackbar.show(snackbarType: SnackbarType.ERROR, message: "Error exporting CSV: $e");
+      loadingCubit.hide();
+    } finally {
       loadingCubit.hide();
     }
   }
