@@ -11,16 +11,17 @@ extension HexColor on Color {
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 
+  Color withOpacityNew(double opacity) {
+    assert(opacity >= 0.0 && opacity <= 1.0);
+    return withAlpha((255.0 * opacity).round());
+  }
+
   /// Prefixes a hash sign if [leadingHashSign] is set to `true` (default is `true`).
   String toHex({bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
       '${alpha.toRadixString(16).padLeft(2, '0')}'
       '${red.toRadixString(16).padLeft(2, '0')}'
       '${green.toRadixString(16).padLeft(2, '0')}'
       '${blue.toRadixString(16).padLeft(2, '0')}';
-
-  Color withOpacity(double opacity) {
-    return withValues(alpha: opacity);
-  }
 
   /// Returns current opacity value (0.0–1.0)
   /// Example: color.opacityValue -> 0.8

@@ -13,7 +13,8 @@ late Box csvKitBox;
 DeviceType? deviceType;
 
 String csvKitDocumentPath = '';
-
 String lastImagePickerDirectoryPath = "";
 String lastCSVDirectoryPath = "";
 String lastCSVExportPath = "";
+
+bool databaseAccessGranted = false;

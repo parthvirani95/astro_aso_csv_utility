@@ -30,6 +30,7 @@ Future<void> mainFunction() async {
   Hive.init('$csvKitDocumentPath${Platform.pathSeparator}localDb');
   csvKitBox = await Hive.openBox(HiveBoxConstants.CSVKIT_BOX);
   unawaited(get_it.init());
+  databaseAccessGranted = csvKitBox.get(HiveConstants.DATABASE_ACCESS_GRANTED, defaultValue: false);
 
   final Catcher2Options debugOptions = Catcher2Options(SilentReportMode(), [ConsoleHandler()]);
   final Catcher2Options releaseOptions = Catcher2Options(SilentReportMode(), [ConsoleHandler()]);

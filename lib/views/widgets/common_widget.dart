@@ -347,6 +347,7 @@ class CommonWidget {
     bool removeImage = false,
     Color? fontColor,
     Color? buttonFontColor,
+    TextAlign? textAlign,
   }) {
     return Center(
       child: Container(
@@ -378,10 +379,10 @@ class CommonWidget {
               Text(
                 subHeading?.replaceAll("==", "\n") ?? '',
                 style: Theme.of(context).textTheme.primarySmallLightHeading.copyWith(
-                      color: fontColor ?? AppColor.appTextColor.multiplyOpacityNew(0.9),
-                      height: 1.3,
+                      color: fontColor?.withOpacityNew(0.8) ?? AppColor.appTextColor.multiplyOpacityNew(0.9),
+                      height: 1.6,
                     ),
-                textAlign: TextAlign.center,
+                textAlign: textAlign ?? TextAlign.center,
               ),
               CommonWidget().sizesBox(height: 42),
               actionButton ??

@@ -1,10 +1,10 @@
 import 'package:astro_aso_csv_utility/shared/di/get_it.dart';
 import 'package:astro_aso_csv_utility/shared/themes/app_color.dart';
+import 'package:astro_aso_csv_utility/shared/utils/app_error.dart';
 import 'package:astro_aso_csv_utility/views/cubits/utility/utility_cubit.dart';
 import 'package:astro_aso_csv_utility/views/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UtilityView extends StatefulWidget {
   const UtilityView({super.key});
@@ -56,13 +56,15 @@ class _UtilityViewState extends State<UtilityView> with SingleTickerProviderStat
     return Center(
       child: CommonWidget().dataNotFound(
         context: context,
-        buttonLabel: "Try Again",
-        heading: "Something went wrong",
-        subHeading: state.errorMessage,
+        onTap: () async => await utilityCubit.loadData(isRetry: true),
+        buttonLabel: state.appError.errorType == AppErrorType.database ? "Grant Access" : "Try Again",
+        heading:
+            state.appError.errorType == AppErrorType.database ? "Database Access Required" : "Something went wrong",
+        subHeading: state.appError.errorMessage,
         buttonColor: const Color(0xFF8AFF00),
         fontColor: AppColor.whiteColor,
         buttonFontColor: AppColor.blackColor,
-        padding: EdgeInsets.only(bottom: 30.h),
+        textAlign: state.appError.errorType == AppErrorType.database ? TextAlign.left : TextAlign.center,
       ),
     );
   }

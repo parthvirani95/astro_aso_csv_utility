@@ -1,3 +1,10 @@
+import 'dart:io';
+
+import 'package:astro_aso_csv_utility/globals.dart';
+import 'package:astro_aso_csv_utility/models/app_list_model.dart';
+import 'package:astro_aso_csv_utility/shared/constants/hive_constants.dart';
+import 'package:astro_aso_csv_utility/shared/utils/app_error.dart';
+import 'package:astro_aso_csv_utility/shared/utils/database_helper.dart';
 import 'package:astro_aso_csv_utility/views/cubits/loading/loading_cubit.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -936,11 +943,135 @@ Map<String, String> countryCodeMap = {
   "Zimbabwe": "zw",
 };
 
+String databaseAccessMsg = '''
+  We need access to the Astro app database to list apps during CSV build.
+
+  • Read-only access (no changes will be made)
+  • The database will only be copied locally
+
+  Steps to continue:
+  1. Allow access when prompted, OR
+  2. Go to System Settings → Privacy & Security → Full Disk Access
+  3. Enable access for this app
+  4. Restart the app
+
+  You can also select the Astro folder manually if needed.
+  ''';
+
 class UtlityCubit extends Cubit<UtilityState> {
   final LoadingCubit loadingCubit;
-  UtlityCubit({required this.loadingCubit}) : super(UtilityLoadingState());
 
-  void loadData() async {
-    emit(UtilityLoadedState());
+  UtlityCubit({required this.loadingCubit})
+      : super(
+          databaseAccessGranted
+              ? UtilityLoadingState()
+              : UtilityDatabaseAccessState(databaseAccessMsg: databaseAccessMsg),
+        );
+
+  Future<void> loadData({bool isRetry = false}) async {
+    emit(UtilityLoadingState());
+
+    try {
+      bool status = await copyAstroDatabaseFile(isRetry: isRetry);
+      if (status) {
+        final appList = await DatabaseHelper.instance.getAppNameAndIds();
+        emit(UtilityLoadedState(appList: appList));
+      }
+    } catch (e) {
+      String errorMessage = '';
+      if (e.toString().contains("Operation not permitted")) {
+        errorMessage = databaseAccessMsg;
+        openDiskAccess();
+      } else {
+        errorMessage = 'Failed to copy Astro database file';
+      }
+      emit(UtilityErrorState(appError: AppError(errorType: AppErrorType.database, errorMessage: errorMessage)));
+    }
+  }
+
+  Future<bool> copyAstroDatabaseFile({bool isRetry = false}) async {
+    final sourcePath = getAstroPath();
+    final destinationPath = '$csvKitDocumentPath${Platform.pathSeparator}astro_backup';
+
+    if (!await canAccess(sourcePath)) {
+      String errorMessage = databaseAccessMsg;
+      emit(UtilityErrorState(appError: AppError(errorType: AppErrorType.database, errorMessage: errorMessage)));
+
+      if (isRetry) {
+        await openDiskAccess();
+      }
+      return false;
+    }
+
+    final sourceDir = Directory(sourcePath);
+    final destDir = Directory(destinationPath);
+
+    if (!sourceDir.existsSync()) {
+      emit(UtilityErrorState(appError: AppError(errorType: AppErrorType.database, errorMessage: databaseAccessMsg)));
+      if (isRetry) {
+        await openDiskAccess();
+      }
+      return false;
+    }
+
+    await copyDirectory(sourceDir, destDir);
+
+    if (destDir.listSync(recursive: true).isEmpty) {
+      return false;
+    } else {
+      csvKitBox.put(HiveConstants.DATABASE_ACCESS_GRANTED, true);
+    }
+
+    return true;
+  }
+
+  String getAstroPath() {
+    final home = Platform.environment['HOME'];
+    return '$home/Library/Containers/matteospada.it.ASO/Data/Library/Application Support/Astro';
+  }
+
+  Future<bool> canAccess(String path) async {
+    try {
+      final dir = Directory(path);
+      await dir.list().first;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> copyDirectory(Directory source, Directory destination) async {
+    if (!destination.existsSync()) {
+      destination.createSync(recursive: true);
+    }
+
+    await for (final entity in source.list(recursive: false)) {
+      final newPath = '${destination.path}/${entity.uri.pathSegments.last}';
+
+      if (entity is Directory) {
+        await copyDirectory(entity, Directory(newPath));
+      } else if (entity is File) {
+        await entity.copy(newPath);
+      }
+    }
+  }
+
+  Future<dynamic> openDiskAccess() async {
+    try {
+      await openFullDiskAccessSettings();
+    } catch (e) {
+      emit(
+        UtilityErrorState(
+          appError: AppError(
+            errorType: AppErrorType.database,
+            errorMessage: 'Failed to open full disk access settings. Please do manually in settings.',
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> openFullDiskAccessSettings() async {
+    Process.run('open', ['x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles']);
   }
 }
