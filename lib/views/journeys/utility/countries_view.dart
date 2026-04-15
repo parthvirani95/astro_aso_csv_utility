@@ -36,8 +36,14 @@ class _CountriesViewState extends State<CountriesView> {
   void initState() {
     state = widget.state;
 
-    allCountriesList.addAll(countryCodeMap.keys.toList());
-    filteredCountriesList.addAll(countryCodeMap.keys.toList());
+    List<String> astroCountryCode = astroCountryMap.keys.toList();
+
+    allCountriesList.addAll(
+      countryCodeMap.keys.toList().where((e) => astroCountryCode.contains(countryCodeMap[e]?.trim() ?? '')).toList(),
+    );
+    filteredCountriesList.addAll(
+      countryCodeMap.keys.toList().where((e) => astroCountryCode.contains(countryCodeMap[e]?.trim() ?? '')).toList(),
+    );
     selectedList.addAll(widget.state.selectedCountries);
 
     if (selectedList.isNotEmpty) {
@@ -100,6 +106,7 @@ class _CountriesViewState extends State<CountriesView> {
                 title: "Select All",
                 onTap: () async {
                   selectedList.addAll(allCountriesList);
+                  selectedList = selectedList.toSet().toList();
                   setState(() {});
                 },
               ),
