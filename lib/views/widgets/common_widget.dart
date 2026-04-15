@@ -67,48 +67,6 @@ class CommonWidget {
     );
   }
 
-  Widget homePageAppBar({required BuildContext context, required String label}) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 8.h),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: ScreenUtil().statusBarHeight),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white, width: 3),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  padding: EdgeInsets.all(6.r),
-                  child: SvgPicture.asset(
-                    "assets/pngs/images/logo_white_bg.png",
-                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                    width: 16.r,
-                    height: 16.r,
-                  ),
-                ),
-                sizesBox(width: 8.w),
-                Text(
-                  "SocialX Repost+",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.primaryBigBoldHeading.copyWith(color: Colors.white, fontSize: 22.sp),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 8.h),
-        ],
-      ),
-    );
-  }
-
   Widget toolTipWidget(BuildContext context, {required String message, Widget? child}) {
     return WidgetTooltip(
       message: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColor.primary)),
