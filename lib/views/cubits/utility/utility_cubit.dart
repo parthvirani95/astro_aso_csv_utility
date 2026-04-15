@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:astro_aso_csv_utility/globals.dart';
 import 'package:astro_aso_csv_utility/models/app_list_model.dart';
 import 'package:astro_aso_csv_utility/shared/constants/hive_constants.dart';
+import 'package:astro_aso_csv_utility/shared/constants/snackbar_type.dart';
 import 'package:astro_aso_csv_utility/shared/utils/app_error.dart';
+import 'package:astro_aso_csv_utility/shared/utils/custom_snackbar.dart';
 import 'package:astro_aso_csv_utility/shared/utils/database_helper.dart';
 import 'package:astro_aso_csv_utility/views/cubits/loading/loading_cubit.dart';
 import 'package:bloc/bloc.dart';
@@ -973,19 +975,39 @@ class UtlityCubit extends Cubit<UtilityState> {
 
     try {
       bool status = await copyAstroDatabaseFile(isRetry: isRetry);
-      if (status) {
+      bool dbExists = await isAstroDatabaseExists();
+      if (status && dbExists) {
         final appList = await DatabaseHelper.instance.getAppNameAndIds();
         emit(UtilityLoadedState(appList: appList));
+      } else {
+        emit(
+          UtilityErrorState(
+            appError: AppError(
+              errorType: AppErrorType.database,
+              errorMessage: 'Astro database file not found\n$databaseAccessMsg',
+            ),
+          ),
+        );
       }
     } catch (e) {
       String errorMessage = '';
-      if (e.toString().contains("Operation not permitted")) {
+      bool dbExists = await isAstroDatabaseExists();
+      if (dbExists && e.toString().contains("Operation not permitted")) {
+        final appList = await DatabaseHelper.instance.getAppNameAndIds();
+        CustomSnackbar.show(
+          snackbarType: SnackbarType.ERROR,
+          message: 'Using old database file due to lake of access to the new database file',
+        );
+        emit(UtilityLoadedState(appList: appList));
+        return;
+      } else if (e.toString().contains("Operation not permitted")) {
         errorMessage = databaseAccessMsg;
         openDiskAccess();
+        emit(UtilityErrorState(appError: AppError(errorType: AppErrorType.data, errorMessage: errorMessage.trim())));
       } else {
-        errorMessage = 'Failed to copy Astro database file';
+        errorMessage = "Error: ${e.toString()}";
+        emit(UtilityErrorState(appError: AppError(errorType: AppErrorType.data, errorMessage: errorMessage.trim())));
       }
-      emit(UtilityErrorState(appError: AppError(errorType: AppErrorType.database, errorMessage: errorMessage)));
     }
   }
 
@@ -1028,6 +1050,11 @@ class UtlityCubit extends Cubit<UtilityState> {
   String getAstroPath() {
     final home = Platform.environment['HOME'];
     return '$home/Library/Containers/matteospada.it.ASO/Data/Library/Application Support/Astro';
+  }
+
+  Future<bool> isAstroDatabaseExists() async {
+    final dbPath = '$csvKitDocumentPath${Platform.pathSeparator}astro_backup';
+    return await Directory(dbPath).exists();
   }
 
   Future<bool> canAccess(String path) async {
