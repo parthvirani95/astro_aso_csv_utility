@@ -1,7 +1,3 @@
-// ignore_for_file: empty_catches
-
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
@@ -12,13 +8,6 @@ void commonPrint(Object data) {
 }
 
 class AppFunctions {
-  String getDeviceCountryCode() {
-    // Fetch the country code based on device locale
-    // ignore: deprecated_member_use
-    final Locale deviceLocale = window.locale;
-    return deviceLocale.countryCode ?? 'unknown';
-  }
-
   String customFormatNumber(String input) {
     try {
       // Format integer and decimal parts separately

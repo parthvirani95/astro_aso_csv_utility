@@ -4,6 +4,7 @@ import 'package:astro_aso_csv_utility/shared/extention/theme_extension.dart';
 import 'package:astro_aso_csv_utility/shared/themes/app_color.dart';
 import 'package:astro_aso_csv_utility/views/cubits/utility/utility_cubit.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/app_list_view.dart';
+import 'package:astro_aso_csv_utility/views/journeys/utility/countries_view.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/keyword_view.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/platforms_view.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/utility_view.dart';
@@ -80,7 +81,7 @@ abstract class UtilityWidget extends State<UtilityView> {
                         title: "Countries",
                         onTap: () async => await bottomSheet(
                           context: context,
-                          child: Container(),
+                          child: CountriesView(utilityCubit: utilityCubit, state: state),
                         ),
                       ),
                     ],
@@ -102,11 +103,7 @@ abstract class UtilityWidget extends State<UtilityView> {
                   CommonWidget().sizesBox(height: 12),
                   selectedKeywordsView(context: context, state: state),
                   CommonWidget().sizesBox(height: 12),
-                  CommonWidget().containerField(
-                    context: context,
-                    title: "Countries : ",
-                    width: ScreenUtil().screenWidth,
-                  ),
+                  selectedCountriesView(context: context, state: state),
                   CommonWidget().sizesBox(height: 12),
                   Row(
                     children: [
@@ -287,6 +284,56 @@ abstract class UtilityWidget extends State<UtilityView> {
                           onTap: () async => await bottomSheet(
                             context: context,
                             child: KeywordsView(utilityCubit: utilityCubit, state: state),
+                          ),
+                        );
+                      },
+                    ).toList(),
+                  ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget selectedCountriesView({required BuildContext context, required UtilityLoadedState state}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.greyColor.withOpacityNew(0.1),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColor.greyColor.withOpacityNew(0.1)),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 8.r),
+      child: Row(
+        children: [
+          CommonWidget().sizesBox(width: 8),
+          optionHeading(context: context, label: "Countries"),
+          CommonWidget().sizesBox(width: 8),
+          Expanded(
+            child: state.selectedCountries.isEmpty
+                ? Align(
+                    alignment: Alignment.centerRight,
+                    child: CommonWidget().containerField(
+                      context: context,
+                      title: "Select Countries",
+                      onTap: () async => await bottomSheet(
+                        context: context,
+                        child: CountriesView(utilityCubit: utilityCubit, state: state),
+                      ),
+                    ))
+                : Wrap(
+                    spacing: 12.r,
+                    runSpacing: 12.r,
+                    alignment: WrapAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    runAlignment: WrapAlignment.end,
+                    children: state.selectedCountries.map(
+                      (country) {
+                        return CommonWidget().containerField(
+                          context: context,
+                          title: country,
+                          onTap: () async => await bottomSheet(
+                            context: context,
+                            child: CountriesView(utilityCubit: utilityCubit, state: state),
                           ),
                         );
                       },
