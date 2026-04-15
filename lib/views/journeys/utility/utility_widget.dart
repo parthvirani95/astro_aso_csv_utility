@@ -4,6 +4,7 @@ import 'package:astro_aso_csv_utility/shared/extention/theme_extension.dart';
 import 'package:astro_aso_csv_utility/shared/themes/app_color.dart';
 import 'package:astro_aso_csv_utility/views/cubits/utility/utility_cubit.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/app_list_view.dart';
+import 'package:astro_aso_csv_utility/views/journeys/utility/keyword_view.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/platforms_view.dart';
 import 'package:astro_aso_csv_utility/views/journeys/utility/utility_view.dart';
 import 'package:astro_aso_csv_utility/views/widgets/common_widget.dart';
@@ -70,7 +71,7 @@ abstract class UtilityWidget extends State<UtilityView> {
                         title: "Keywords",
                         onTap: () async => await bottomSheet(
                           context: context,
-                          child: Container(),
+                          child: KeywordsView(utilityCubit: utilityCubit, state: state),
                         ),
                       ),
                       CommonWidget().sizesBox(width: 12),
@@ -99,11 +100,7 @@ abstract class UtilityWidget extends State<UtilityView> {
                   CommonWidget().sizesBox(height: 12),
                   selectedPlatformsView(context: context, state: state),
                   CommonWidget().sizesBox(height: 12),
-                  CommonWidget().containerField(
-                    context: context,
-                    title: "Keywords : ",
-                    width: ScreenUtil().screenWidth,
-                  ),
+                  selectedKeywordsView(context: context, state: state),
                   CommonWidget().sizesBox(height: 12),
                   CommonWidget().containerField(
                     context: context,
@@ -240,6 +237,56 @@ abstract class UtilityWidget extends State<UtilityView> {
                           onTap: () async => await bottomSheet(
                             context: context,
                             child: PlatformsView(utilityCubit: utilityCubit, state: state),
+                          ),
+                        );
+                      },
+                    ).toList(),
+                  ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget selectedKeywordsView({required BuildContext context, required UtilityLoadedState state}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.greyColor.withOpacityNew(0.1),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColor.greyColor.withOpacityNew(0.1)),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 8.r, vertical: 8.r),
+      child: Row(
+        children: [
+          CommonWidget().sizesBox(width: 8),
+          optionHeading(context: context, label: "Keywords"),
+          CommonWidget().sizesBox(width: 8),
+          Expanded(
+            child: state.selectedKeywords.isEmpty
+                ? Align(
+                    alignment: Alignment.centerRight,
+                    child: CommonWidget().containerField(
+                      context: context,
+                      title: "Enter Keywords",
+                      onTap: () async => await bottomSheet(
+                        context: context,
+                        child: KeywordsView(utilityCubit: utilityCubit, state: state),
+                      ),
+                    ))
+                : Wrap(
+                    spacing: 12.r,
+                    runSpacing: 12.r,
+                    alignment: WrapAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    runAlignment: WrapAlignment.end,
+                    children: state.selectedKeywords.map(
+                      (keyword) {
+                        return CommonWidget().containerField(
+                          context: context,
+                          title: keyword,
+                          onTap: () async => await bottomSheet(
+                            context: context,
+                            child: KeywordsView(utilityCubit: utilityCubit, state: state),
                           ),
                         );
                       },

@@ -985,31 +985,30 @@ class UtlityCubit extends Cubit<UtilityState> {
       bool dbExists = await isAstroDatabaseExists();
       if (status && dbExists) {
         final appList = await DatabaseHelper.instance.getAppNameAndIds();
-        final selectedApps = List<int>.from(
+        final hiveApps = List<int>.from(
           await csvKitBox.get(HiveConstants.SELECTED_APPS, defaultValue: []),
         );
-        final selectedPlatforms = List<String>.from(
+        final hivePlatforms = List<String>.from(
           await csvKitBox.get(HiveConstants.SELECTED_PLATFORM, defaultValue: []),
         );
-        final selectedKeywords = List<String>.from(
+        final hiveKeywords = List<String>.from(
           await csvKitBox.get(HiveConstants.SELECTED_KEYWORDS, defaultValue: []),
         );
-        final selectedCountries = List<String>.from(
+        final hiveCountries = List<String>.from(
           await csvKitBox.get(HiveConstants.SELECTED_COUNTRIES, defaultValue: []),
         );
-        final totalCSVRows = await csvKitBox.get(HiveConstants.TOTAL_CSV_ROWS, defaultValue: 0);
-        final splitCSVMaxRows = await csvKitBox.get(HiveConstants.SPLIT_CSV_MAX_ROWS, defaultValue: 0);
 
-        final filteredAppList = appList.where((app) => selectedApps.contains(app.appId)).toList();
+        final splitCSVMaxRows = await csvKitBox.get(HiveConstants.SPLIT_CSV_MAX_ROWS, defaultValue: 0);
+        final filteredAppList = appList.where((app) => hiveApps.contains(app.appId)).toList();
 
         emit(
           UtilityLoadedState(
             appList: appList,
             selectedApps: filteredAppList,
-            selectedPlatforms: selectedPlatforms,
-            selectedKeywords: selectedKeywords,
-            selectedCountries: selectedCountries,
-            totalCSVRows: totalCSVRows,
+            selectedPlatforms: hivePlatforms,
+            selectedKeywords: hiveKeywords,
+            selectedCountries: hiveCountries,
+            totalCSVRows: 0,
             splitCSVMaxRows: splitCSVMaxRows,
           ),
         );
@@ -1159,10 +1158,12 @@ class UtlityCubit extends Cubit<UtilityState> {
   }
 
   void updateSelectedKeywords({required List<String> keywords, required UtilityLoadedState state}) {
+    csvKitBox.put(HiveConstants.SELECTED_KEYWORDS, keywords);
     emit(state.copyWith(selectedKeywords: keywords));
   }
 
   void updateSelectedCountries({required List<String> countries, required UtilityLoadedState state}) {
+    csvKitBox.put(HiveConstants.SELECTED_COUNTRIES, countries);
     emit(state.copyWith(selectedCountries: countries));
   }
 
@@ -1171,6 +1172,7 @@ class UtlityCubit extends Cubit<UtilityState> {
   }
 
   void updateSplitCSVMaxRows({required int splitCSVMaxRows, required UtilityLoadedState state}) {
+    csvKitBox.put(HiveConstants.SPLIT_CSV_MAX_ROWS, splitCSVMaxRows);
     emit(state.copyWith(splitCSVMaxRows: splitCSVMaxRows));
   }
 }

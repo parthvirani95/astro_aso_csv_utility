@@ -9,7 +9,6 @@ class HiveConstants {
   static const String SELECTED_PLATFORM = "SELECTED_PLATFORM";
   static const String SELECTED_KEYWORDS = "SELECTED_KEYWORDS";
   static const String SELECTED_COUNTRIES = "SELECTED_COUNTRIES";
-  static const String TOTAL_CSV_ROWS = "TOTAL_CSV_ROWS";
   static const String SPLIT_CSV_MAX_ROWS = "SPLIT_CSV_MAX_ROWS";
 }
 
