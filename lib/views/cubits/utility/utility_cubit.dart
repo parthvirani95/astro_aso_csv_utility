@@ -1439,8 +1439,17 @@ class UtlityCubit extends Cubit<UtilityState> {
   }
 
   void updateSelectedCountries({required List<String> countries, required UtilityLoadedState state}) {
-    csvKitBox.put(HiveConstants.SELECTED_COUNTRIES, countries);
-    emit(state.copyWith(selectedCountries: countries));
+    List<String> selectedCountries = List<String>.from(countries.map((country) => country.trim()).toList());
+    selectedCountries = selectedCountries.toSet().toList();
+
+    for (String country in countries) {
+      if (!astroCountryMap.keys.contains(countryCodeMap[country]?.trim() ?? '')) {
+        selectedCountries.remove(country);
+      }
+    }
+
+    csvKitBox.put(HiveConstants.SELECTED_COUNTRIES, selectedCountries);
+    emit(state.copyWith(selectedCountries: selectedCountries));
     calculateTotalCSVRows();
   }
 
