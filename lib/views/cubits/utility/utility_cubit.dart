@@ -1354,7 +1354,13 @@ class UtlityCubit extends Cubit<UtilityState> {
         }
 
         for (int i = 0; i < totalCSVFiles; i++) {
-          List<List<dynamic>> sublist = rows.sublist(i * splitCSVMaxRows, (i + 1) * splitCSVMaxRows);
+          int startIndex = i * splitCSVMaxRows;
+          int endIndex = (i + 1) * splitCSVMaxRows;
+          if (endIndex > rows.length) {
+            endIndex = rows.length;
+          }
+
+          List<List<dynamic>> sublist = rows.sublist(startIndex, endIndex);
           sublist.insert(0, headers);
 
           String csv = const ListToCsvConverter().convert(sublist);
