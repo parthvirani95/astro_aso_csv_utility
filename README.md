@@ -1,5 +1,7 @@
 # Astro ASO CSV Utility
 
+Get Astro ASO Tool : https://tryastro.app/?aff=rBzWA
+
 Open-source macOS utility built with Flutter to generate Astro-compatible CSV files for large-scale keyword workflows.
 
 ## Why this tool exists
